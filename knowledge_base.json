@@ -1,0 +1,192 @@
+{
+  "questions": [
+    {
+      "fact": "slices_remaining",
+      "text": "How many slices remain?",
+      "type": "number"
+    },
+    {
+      "fact": "continued_demand",
+      "text": "Do you expect more demand for this cake?"
+    },
+    {
+      "fact": "ingredients_available",
+      "text": "Are ingredients for another batch available?"
+    },
+    {
+      "fact": "staff_available",
+      "text": "Is a qualified employee available without a higher-priority task?"
+    },
+    {
+      "fact": "preparation_minutes",
+      "text": "How many minutes until a new batch would be ready to sell?",
+      "type": "number"
+    },
+    {
+      "fact": "minutes_until_closing",
+      "text": "How many minutes until closing?",
+      "type": "number"
+    }
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "when": {
+        "one_or_fewer_slices": true,
+        "continued_demand": true
+      },
+      "then": {
+        "batch_needed": true
+      },
+      "explanation": "At most one slice remains and further demand is expected, so another batch is needed."
+    },
+    {
+      "id": "R2",
+      "when": {
+        "batch_needed": true,
+        "ingredients_available": true,
+        "staff_available": true
+      },
+      "then": {
+        "preparation_feasible": true
+      },
+      "explanation": "Another batch is needed and ingredients and qualified staff are available, so preparation is feasible."
+    },
+    {
+      "id": "R3",
+      "when": {
+        "preparation_feasible": true,
+        "enough_time": true
+      },
+      "then": {
+        "start_batch": true
+      },
+      "explanation": "Preparation is feasible and there is enough selling time, so start another batch."
+    },
+    {
+      "id": "R4",
+      "when": {
+        "batch_needed": true,
+        "enough_time": false
+      },
+      "then": {
+        "skip_batch": true
+      },
+      "explanation": "There is insufficient time to prepare and sell another batch before closing."
+    },
+    {
+      "id": "R5",
+      "when": {
+        "batch_needed": true,
+        "enough_time": true,
+        "ingredients_available": false
+      },
+      "then": {
+        "review_stock": true
+      },
+      "explanation": "A batch is needed and time permits, but missing ingredients prevent preparation."
+    },
+    {
+      "id": "R6",
+      "when": {
+        "batch_needed": true,
+        "enough_time": true,
+        "ingredients_available": true,
+        "staff_available": false
+      },
+      "then": {
+        "postpone_batch": true
+      },
+      "explanation": "Ingredients and time are available, but no qualified employee is currently free."
+    },
+    {
+      "id": "R7",
+      "when": {
+        "slices_remaining": {
+          "op": "le",
+          "value": 1
+        }
+      },
+      "then": {
+        "one_or_fewer_slices": true
+      },
+      "explanation": "At most one slice remains, so the preparation threshold is reached."
+    },
+    {
+      "id": "R8",
+      "when": {
+        "minutes_until_closing": {
+          "op": "gt",
+          "fact": "preparation_minutes"
+        }
+      },
+      "then": {
+        "enough_time": true
+      },
+      "explanation": "Preparation finishes before closing, leaving some time to sell the cake."
+    },
+    {
+      "id": "R9",
+      "when": {
+        "minutes_until_closing": {
+          "op": "le",
+          "fact": "preparation_minutes"
+        }
+      },
+      "then": {
+        "enough_time": false
+      },
+      "explanation": "Preparation would finish at or after closing, leaving no selling time."
+    },
+    {
+      "id": "R10",
+      "when": {
+        "slices_remaining": {
+          "op": "gt",
+          "value": 1
+        },
+        "continued_demand": true
+      },
+      "then": {
+        "enough_cake": true
+      },
+      "explanation": "More than one slice remains, so the preparation threshold has not yet been reached."
+    },
+    {
+      "id": "R11",
+      "when": {
+        "continued_demand": false
+      },
+      "then": {
+        "no_further_batch": true
+      },
+      "explanation": "No further demand is expected, so another batch is not needed."
+    }
+  ],
+  "recommendations": [
+    {
+      "fact": "start_batch",
+      "text": "Start preparing the next cake batch now."
+    },
+    {
+      "fact": "skip_batch",
+      "text": "Do not start another batch before closing."
+    },
+    {
+      "fact": "review_stock",
+      "text": "Review ingredient availability before preparing another batch."
+    },
+    {
+      "fact": "postpone_batch",
+      "text": "Postpone preparation and reassess when qualified staff become available."
+    },
+    {
+      "fact": "enough_cake",
+      "text": "Enough cake remains for now under the one-slice threshold; reassess as slices sell."
+    },
+    {
+      "fact": "no_further_batch",
+      "text": "No further batch is needed because no more demand is expected."
+    }
+  ]
+}
